@@ -1,0 +1,125 @@
+<script setup>
+
+import { ref } from 'vue';
+import Icon from '@/components/Icon.vue';
+import FloatingConfigurator from '@/components/FloatingConfigurator.vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
+
+const router = useRouter();
+const authStore = useAuthStore();
+
+const name = ref('');
+const email = ref('');
+const password = ref('');
+const confirmPassword = ref('');
+
+import api from '@/services/api';
+
+const loading = ref(false);
+const error = ref('');
+
+const Register = async () => {
+    loading.value = true;
+    error.value = '';
+
+    try {
+        await authStore.register(
+            name.value,
+            email.value,
+            password.value,
+            confirmPassword.value
+        );
+
+        await router.push(
+            authStore.isAdmin
+                ? { name: 'admin.dashboard' }
+                : { name: 'dashboard' }
+        );
+
+    } catch (err) {
+        if (err.response?.status === 422) {
+            error.value = 'Please check the submitted information.';
+        } else {
+            error.value = 'An error occurred while creating the account.';
+        }
+        console.log(err)
+    } finally {
+        loading.value = false;
+    }
+};
+</script>
+
+<template>
+    <FloatingConfigurator />
+    <div
+        class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden">
+        <div class="flex flex-col items-center justify-center">
+            <div
+                style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
+                <div class="w-full bg-surface-0 dark:bg-surface-900 py-10 px-8 sm:px-20" style="border-radius: 53px">
+                    <div class="text-center mb-8">
+                        <Icon class="mb-8 w-16 shrink-0 mx-auto"/>
+                        <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Welcome to
+                            Ticketing!</div>
+                        <span class="text-muted-color font-medium">Register to continue</span>
+                    </div>
+
+                    <div>
+                        <label for="name"
+                            class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Name</label>
+                        <InputText id="name" type="text" placeholder="Name" class="w-full md:w-[30rem] mb-4"
+                            v-model="name" />
+
+                        <label for="email"
+                            class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Email</label>
+                        <InputText id="email" type="text" placeholder="Email address" class="w-full md:w-[30rem] mb-4"
+                            v-model="email" />
+
+                        <label for="password"
+                            class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Password</label>
+                        <Password id="password" v-model="password" placeholder="Password" :toggleMask="true"
+                            class="mb-4" fluid :feedback="false"></Password>
+
+                        <label for="confirmPassword"
+                            class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">
+                            Confirm Password
+                        </label>
+
+                        <Password id="confirmPassword" v-model="confirmPassword" placeholder="Confirm Password"
+                            :toggleMask="true" class="mb-4" fluid :feedback="false"
+                            :invalid="password !== confirmPassword && confirmPassword !== ''" />
+
+                        <Message v-if="error" severity="error" class="mb-4">
+                            {{ error }}
+                        </Message>
+                        <Button label="Register" class="w-full" :loading="loading" @click="Register"></Button>
+
+                        <div class="text-center mt-6">
+                            <span class="text-muted-color">Already have an account?</span>
+
+                            <router-link
+                                :to="{ name: 'login' }"
+                                class="font-medium text-primary ml-2 no-underline"
+                            >
+                                Sign in
+                            </router-link>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style scoped>
+.pi-eye {
+    transform: scale(1.6);
+    margin-right: 1rem;
+}
+
+.pi-eye-slash {
+    transform: scale(1.6);
+    margin-right: 1rem;
+}
+</style>

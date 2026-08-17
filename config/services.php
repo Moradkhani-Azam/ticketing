@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'external_api' => [
+        'url' => env('EXTERNAL_API_URL'),
+        'retry_delay' => env('EXTERNAL_API_RETRY_DELAY', 3600)
+    ],
+
 ];
