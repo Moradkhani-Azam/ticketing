@@ -21,6 +21,7 @@ A Laravel and Vue.js based ticket management system with role-based access contr
 - Role-based access control
 - Email notification when ticket status changes
 - Queue-based background processing
+- Automated tests for ticket workflow
 
 ## Requirements
 
@@ -71,7 +72,7 @@ php artisan key:generate
 Laravel stores publicly accessible uploaded files inside:
 
 ```bash
-sudo docker compose exec app php artisan storage:link
+php artisan storage:link
 ```
 
 ## Environment Configuration
@@ -112,7 +113,7 @@ POST /logout
 Current authenticated user:
 
 ```text
-GET /api/v1/me
+GET /api/me
 ```
 
 ## Database Setup
@@ -457,6 +458,35 @@ External API called
 
 This prevents slow external services from blocking the admin request.
 
+# Testing
+
+The project contains automated tests for important business logic.
+
+Run the ticket workflow test:
+
+```bash
+php artisan test
+```
+
+
+The ticket workflow test verifies that:
+
+- A ticket can be approved
+- The ticket status changes correctly
+- The status history is created
+- The `TicketStatusChanged` event is dispatched
+
+Example workflow:
+
+```text
+pending_review
+      ↓
+pending_level_two
+      ↓
+status history created
+      ↓
+TicketStatusChanged event dispatched
+```
 
 # Project Structure
 
@@ -500,6 +530,9 @@ routes/
 ├── web.php
 └── console.php
 
+tests/
+├── Feature/
+└── Unit/
 ```
 
 # API Structure
@@ -592,3 +625,77 @@ Then make sure the queue worker is running:
 ```bash
 php artisan queue:work
 ```
+
+
+# Docker
+
+The project can also be run using Docker Compose. The Docker setup includes:
+
+- PHP 8.3 / Laravel application
+- Nginx
+- MySQL 8
+- phpMyAdmin
+- Node.js 22 / Vite development server
+- Laravel queue worker managed by Supervisor
+
+## Docker Requirements
+
+Make sure Docker and Docker Compose are installed.
+
+Check:
+
+```bash
+docker --version
+docker compose version
+```
+
+## Start the Application
+
+Create the environment file if it does not exist:
+
+```bash
+cp .env.example .env
+```
+
+Build the PHP image and start the containers:
+
+```bash
+sudo docker compose up -d --build
+```
+
+The application will normally be available at:
+
+```text
+http://localhost:8080
+```
+
+phpMyAdmin:
+
+```text
+http://localhost:8081
+```
+
+## Database Migration
+
+Run Laravel migrations inside the application container:
+
+```bash
+sudo docker compose exec app php artisan migrate --seed
+```
+
+## Laravel Cache
+
+After changing `.env` or other configuration values:
+
+```bash
+sudo docker compose exec app php artisan optimize:clear
+```
+
+## Laravel Storage Link
+
+Laravel stores publicly accessible uploaded files inside:
+
+```bash
+sudo docker compose exec app php artisan storage:link
+```
+
