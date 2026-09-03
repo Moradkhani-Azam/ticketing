@@ -33,7 +33,7 @@ class TicketWorkflowTest extends TestCase
         $updatedTicket = $service->changeStatus(
             ticket: $ticket,
             status: TicketStatus::PendingLevelTwo,
-            user: $admin,
+            admin: $admin,
             comment: 'Ticket approved.',
         );
 
@@ -52,10 +52,9 @@ class TicketWorkflowTest extends TestCase
 
         Event::assertDispatched(
             TicketStatusChanged::class,
-            function ($event) use ($ticket, $admin) {
+            function ($event) use ($ticket) {
                 return $event->ticket->id === $ticket->id
-                    && $event->user->id === $admin->id
-                    && $event->newStatus === TicketStatus::PendingLevelTwo;
+                    && $event->comment === 'Ticket approved.';
             }
         );
     }

@@ -55,7 +55,7 @@ class TicketController extends Controller
         $this->changeStatus(
             ticket: $ticket,
             status: TicketStatus::Rejected,
-            user: $request->user(),
+            admin: $request->user(),
             comment: $validated['comment'] ?? null,
         );
 
@@ -65,7 +65,7 @@ class TicketController extends Controller
     public function bulkApprove(BulkApproveTicketsRequest $request): JsonResponse
     {
         $ticketIds = $request->validated('ticket_ids');
-        $user = $request->user();
+        $admin = $request->user();
         $comment = $request->validated('comment');
 
         $tickets = Ticket::query()
@@ -79,7 +79,7 @@ class TicketController extends Controller
 
         foreach ($tickets as $ticket) {
             try {
-                $this->processApproval($ticket, $user, $comment);
+                $this->processApproval($ticket, $admin, $comment);
                 $approved[] = $ticket->id;
             } catch (Throwable $exception) {
                 $failed[] = [
@@ -98,9 +98,9 @@ class TicketController extends Controller
         ]);
     }
 
-    private function processApproval(Ticket $ticket, User $user, ?string $customComment = null): void
+    private function processApproval(Ticket $ticket, User $admin, ?string $customComment = null): void
     {
-        if ($user->hasRole('admin_level_2')) {
+        if ($admin->hasRole('admin_level_2')) {
             $status = TicketStatus::Sending;
             $defaultComment = 'Ticket approved by level two.';
         } else {
@@ -111,7 +111,7 @@ class TicketController extends Controller
         $this->changeStatus(
             ticket: $ticket,
             status: $status,
-            user: $user,
+            admin: $admin,
             comment: $customComment ?? $defaultComment,
         );
     }
@@ -119,10 +119,10 @@ class TicketController extends Controller
     public function changeStatus(
         Ticket $ticket,
         TicketStatus $status,
-        ?User $user = null,
+        ?User $admin = null,
         ?string $comment = null
     ): Ticket {
-        return DB::transaction(function () use ($ticket, $status, $user, $comment) {
+        return DB::transaction(function () use ($ticket, $status, $admin, $comment) {
             $oldStatus = $ticket->status;
 
             if ($oldStatus === $status) {
@@ -132,7 +132,7 @@ class TicketController extends Controller
             $ticket->update(['status' => $status]);
 
             $ticket->statusHistories()->create([
-                'user_id' => $user?->id,
+                'user_id' => $admin?->id,
                 'from_status' => $oldStatus->value,
                 'to_status' => $status->value,
                 'comment' => $comment,
