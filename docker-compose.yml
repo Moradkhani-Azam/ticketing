@@ -11,12 +11,8 @@ services:
       - ./:/var/www/html
       - vendor:/var/www/html/vendor
     environment:
-      - APP_ENV=local
-      - APP_DEBUG=true
       - APP_URL=http://localhost:8080
       - DB_HOST=db
-      - DB_PORT=3306
-      - DB_DATABASE=ticketing
       - DB_USERNAME=ticketing_user
       - DB_PASSWORD=secret
       - EXTERNAL_API_URL=http://nginx/api/external-service/send
@@ -34,6 +30,7 @@ services:
       - "8080:80"
     volumes:
       - ./public:/var/www/html/public:ro
+      - ./storage:/var/www/html/storage:ro
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - app
@@ -45,8 +42,8 @@ services:
     container_name: ticketing_db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: ticketing
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD:-root}'
+      MYSQL_DATABASE: '${DB_DATABASE:-ticketing}'
       MYSQL_USER: ticketing_user
       MYSQL_PASSWORD: secret
     volumes:
@@ -68,7 +65,7 @@ services:
       PMA_HOST: db
       PMA_PORT: 3306
       PMA_USER: root
-      PMA_PASSWORD: root
+      PMA_PASSWORD: '${DB_PASSWORD:-root}'
     ports:
       - "8081:80"
     depends_on:
@@ -106,12 +103,8 @@ services:
       - vendor:/var/www/html/vendor
 
     environment:
-      APP_ENV: local
-      APP_DEBUG: "true"
       APP_URL: http://localhost:8080
       DB_HOST: db
-      DB_PORT: 3306
-      DB_DATABASE: ticketing
       DB_USERNAME: ticketing_user
       DB_PASSWORD: secret
       EXTERNAL_API_URL: http://nginx/api/external-service/send

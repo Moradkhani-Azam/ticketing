@@ -42,4 +42,18 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    public function adminLevelOne(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $user->assignRole('admin_level_1');
+        });
+    }
+
+    public function adminLevelTwo(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $user->assignRole('admin_level_2');
+        });
+    }
 }

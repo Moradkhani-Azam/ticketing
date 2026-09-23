@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ExternalApiAttemptStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -20,6 +21,7 @@ class ExternalApiAttempt extends Model
     protected function casts(): array
     {
         return [
+            'status' => ExternalApiAttemptStatus::class,
             'attempted_at' => 'datetime',
         ];
     }

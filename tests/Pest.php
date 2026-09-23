@@ -2,6 +2,9 @@
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Database\Seeders\PermissionSeeder;
+use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -15,7 +18,11 @@ use Tests\TestCase;
 */
 
 pest()->extend(TestCase::class)
- // ->use(RefreshDatabase::class)
+    // ->use(RefreshDatabase::class)
+    ->use(LazilyRefreshDatabase::class)
+    ->beforeEach(function () {
+        $this->seed(PermissionSeeder::class);
+    })
     ->in('Feature');
 
 /*

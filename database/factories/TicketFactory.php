@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Models\Ticket;
-use Illuminate\Database\Eloquent\Factories\Factory;
-use App\Models\User;
 use App\Enums\TicketStatus;
+use App\Models\Ticket;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends Factory<Ticket>
@@ -27,5 +27,19 @@ class TicketFactory extends Factory
             'attachment_type' => 'application/pdf',
             'status' => TicketStatus::PendingReview,
         ];
+    }
+
+    public function pendingReview(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => TicketStatus::PendingReview,
+        ]);
+    }
+
+    public function pendingLevelTwo(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => TicketStatus::PendingLevelTwo,
+        ]);
     }
 }

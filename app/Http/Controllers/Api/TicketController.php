@@ -25,8 +25,12 @@ class TicketController extends Controller
         );
     }
 
-    public function show(Ticket $ticket): TicketResource
+    public function show(Request $request, Ticket $ticket): TicketResource
     {
+        $ticket = $request->user()
+            ->tickets()
+            ->findOrFail($ticket->id);
+
         return new TicketResource($ticket);
     }
 

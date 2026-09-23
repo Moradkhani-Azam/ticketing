@@ -35,6 +35,12 @@ class BulkApproveTicketsRequest extends FormRequest
                 'distinct',
                 'exists:tickets,id',
             ],
+
+            'comment' => [
+                'nullable',
+                'string',
+                'max:2000',
+            ],
         ];
     }
 }
